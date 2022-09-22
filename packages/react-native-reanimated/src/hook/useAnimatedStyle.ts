@@ -114,6 +114,22 @@ function prepareAnimation(
   }
 }
 
+const safeAssign = (
+  obj: AnimatedStyle,
+  key: string | number,
+  value: Record<string, unknown> | []
+) => {
+  const descriptor = {
+    __proto__: null,
+    value,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  };
+  Object.defineProperty(obj, key, descriptor);
+  return obj;
+};
+
 function runAnimations(
   animation: AnimatedStyle<any>,
   timestamp: Timestamp,
@@ -126,7 +142,7 @@ function runAnimations(
     return true;
   }
   if (Array.isArray(animation)) {
-    result[key] = [];
+    safeAssign(result, key, []);
     let allFinished = true;
     animation.forEach((entry, index) => {
       if (
@@ -150,10 +166,10 @@ function runAnimations(
         animation.callback && animation.callback(true /* finished */);
       }
     }
-    result[key] = animation.current;
+    safeAssign(result, key, animation.current);
     return finished;
   } else if (typeof animation === 'object') {
-    result[key] = {};
+    safeAssign(result, key, {});
     let allFinished = true;
     Object.keys(animation).forEach((k) => {
       if (
@@ -170,7 +186,7 @@ function runAnimations(
     });
     return allFinished;
   } else {
-    result[key] = animation;
+    safeAssign(result, key, animation);
     return true;
   }
 }

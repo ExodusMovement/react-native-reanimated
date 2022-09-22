@@ -50,6 +50,13 @@ function setPath<T>(
   let currObj: NestedObjectValues<T> = obj;
   for (let i = 0; i < keys.length - 1; i++) {
     // creates entry if there isn't one
+    if (
+      keys[i] === '__proto__' ||
+      keys[i] === 'constructor' ||
+      keys[i] === 'prototype'
+    ) {
+      return;
+    }
     currObj = currObj as { [key: string]: NestedObjectValues<T> };
     if (!(keys[i] in currObj)) {
       // if next key is a number create an array

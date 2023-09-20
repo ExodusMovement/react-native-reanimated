@@ -1,6 +1,6 @@
 {
   "name": "@exodus/react-native-reanimated",
-  "version": "2.15.0-exodus.1",
+  "version": "2.15.0-exodus.2",
   "description": "More powerful alternative to Animated library for React Native.",
   "scripts": {
     "test": "yarn run format:js && yarn run lint:js && yarn run test:unit",

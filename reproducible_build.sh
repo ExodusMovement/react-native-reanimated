@@ -59,7 +59,7 @@ then
         install an untrusted software and accept it, or copy the
         /usr/lib/android-sdk/licenses/ from other machine.
     "
-    pip install --user sdkmanager==0.6.5
+    pip3 install --user sdkmanager==0.6.5
     yes | ~/.local/bin/sdkmanager --licenses || true
 fi
 

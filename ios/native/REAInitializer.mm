@@ -46,16 +46,6 @@ JSIExecutor::RuntimeInstaller REAJSIExecutorRuntimeInstaller(
     auto callInvoker = std::make_shared<react::BridgeJSCallInvoker>(bridge.reactInstance);
     auto reanimatedModule = reanimated::createReanimatedModule(bridge, callInvoker);
 #endif
-    auto workletRuntimeValue = runtime.global()
-                                   .getProperty(runtime, "ArrayBuffer")
-                                   .asObject(runtime)
-                                   .asFunction(runtime)
-                                   .callAsConstructor(runtime, {static_cast<double>(sizeof(void *))});
-    uintptr_t *workletRuntimeData =
-        reinterpret_cast<uintptr_t *>(workletRuntimeValue.getObject(runtime).getArrayBuffer(runtime).data(runtime));
-    workletRuntimeData[0] = reinterpret_cast<uintptr_t>(reanimatedModule->runtime.get());
-
-    runtime.global().setProperty(runtime, "_WORKLET_RUNTIME", workletRuntimeValue);
 
     auto version = getReanimatedVersionString(runtime);
     runtime.global().setProperty(runtime, "_REANIMATED_VERSION_CPP", version);

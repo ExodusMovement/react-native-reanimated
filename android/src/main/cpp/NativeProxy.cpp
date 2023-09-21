@@ -165,19 +165,6 @@ void NativeProxy::installJSIBindings() {
   std::shared_ptr<jsi::Runtime> animatedRuntime =
       facebook::jsc::makeJSCRuntime();
 #endif
-  auto workletRuntimeValue =
-      runtime_->global()
-          .getProperty(*runtime_, "ArrayBuffer")
-          .asObject(*runtime_)
-          .asFunction(*runtime_)
-          .callAsConstructor(*runtime_, {static_cast<double>(sizeof(void *))});
-  uintptr_t *workletRuntimeData = reinterpret_cast<uintptr_t *>(
-      workletRuntimeValue.getObject(*runtime_).getArrayBuffer(*runtime_).data(
-          *runtime_));
-  workletRuntimeData[0] = reinterpret_cast<uintptr_t>(animatedRuntime.get());
-
-  runtime_->global().setProperty(
-      *runtime_, "_WORKLET_RUNTIME", workletRuntimeValue);
 
   auto version = getReanimatedVersionString(*runtime_);
   runtime_->global().setProperty(*runtime_, "_REANIMATED_VERSION_CPP", version);

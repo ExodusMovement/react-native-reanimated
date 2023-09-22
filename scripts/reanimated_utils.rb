@@ -1,3 +1,5 @@
+require 'shellwords'
+
 def try_to_parse_react_native_package_json(node_modules_dir)
   react_native_package_json_path = File.join(node_modules_dir, 'react-native/package.json')
   if !File.exist?(react_native_package_json_path)
@@ -17,7 +19,7 @@ def find_config()
     :react_native_common_dir => nil,
   }
 
-  react_native_node_modules_dir = File.join(File.dirname(`cd "#{Pod::Config.instance.installation_root.to_s}" && node --print "require.resolve('react-native/package.json')"`), '..')
+  react_native_node_modules_dir = File.join(File.dirname(`cd #{Shellwords.escape(Pod::Config.instance.installation_root.to_s)} && node --print "require.resolve('react-native/package.json')"`), '..')
   react_native_json = try_to_parse_react_native_package_json(react_native_node_modules_dir)
 
   if react_native_json == nil
@@ -55,12 +57,12 @@ def assert_no_multiple_instances(react_native_info)
   # TODO remove this return to make the assertion run again
   return
 
-  lib_instances_in_react_native_node_modules = %x[find #{react_native_info[:react_native_node_modules_dir]} -name "package.json" | grep "/react-native-reanimated/package.json"]
+  lib_instances_in_react_native_node_modules = %x[find #{Shellwords.escape(react_native_info[:react_native_node_modules_dir])} -name "package.json" | grep "/react-native-reanimated/package.json"]
   lib_instances_in_react_native_node_modules_array = lib_instances_in_react_native_node_modules.split("\n")
   lib_instances_in_reanimated_node_modules_array = Array.new
   reanimated_instances = lib_instances_in_react_native_node_modules_array.length()
   if react_native_info[:react_native_node_modules_dir] != react_native_info[:reanimated_node_modules_dir]
-    lib_instances_in_reanimated_node_modules = %x[find #{react_native_info[:reanimated_node_modules_dir]} -name "package.json" | grep "/react-native-reanimated/package.json"]
+    lib_instances_in_reanimated_node_modules = %x[find #{Shellwords.escape(react_native_info[:reanimated_node_modules_dir])} -name "package.json" | grep "/react-native-reanimated/package.json"]
     lib_instances_in_reanimated_node_modules_array = lib_instances_in_reanimated_node_modules.split("\n")
     reanimated_instances += lib_instances_in_reanimated_node_modules_array.length()
   end

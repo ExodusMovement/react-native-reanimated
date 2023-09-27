@@ -76,7 +76,7 @@
   "homepage": "https://github.com/ExodusMovement/react-native-reanimated#readme",
   "dependencies": {
     "@babel/plugin-transform-object-assign": "^7.16.7",
-    "@babel/preset-typescript": "^7.16.7",
+    "@babel/preset-typescript": "^7.12.13",
     "invariant": "^2.2.4",
     "lodash.isequal": "^4.5.0",
     "setimmediate": "^1.0.5",

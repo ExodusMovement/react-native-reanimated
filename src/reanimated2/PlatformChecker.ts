@@ -13,7 +13,7 @@ export function isWeb(): boolean {
 }
 
 export function shouldBeUseWeb() {
-  return isJest() || isChromeDebugger() || isWeb() || (global.__DEV__ && process.env.REANIMATED_WEB === 'true');
+  return isJest() || isChromeDebugger() || isWeb() || (global as any).__DEV__ && process.env.REANIMATED_WEB === 'true');
 }
 
 export function nativeShouldBeMock() {

@@ -319,7 +319,7 @@
       }
 
       if (canUpdateSynchronously) {
-        [strongSelf.uiManager runSyncUIUpdatesWithObserver:strongSelf];
+        [strongSelf.uiManager runSyncUIUpdatesWithObserver:syncUpdateObserver];
         [syncUpdateObserver unblockUIThread];
       }
       // In case canUpdateSynchronously=true we still have to send uiManagerWillPerformMounting event

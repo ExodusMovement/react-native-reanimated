@@ -1,6 +1,6 @@
 {
   "name": "@exodus/react-native-reanimated",
-  "version": "3.16.7-rc.0",
+  "version": "3.16.7-rc.1",
   "description": "More powerful alternative to Animated library for React Native.",
   "scripts": {
     "test": "jest",
@@ -179,5 +179,6 @@
     "./lib/module/initializers.js",
     "./lib/module/index.js"
   ],
-  "packageManager": "yarn@4.1.1"
+  "packageManager": "yarn@4.1.1",
+  "stableVersion": "3.16.7-rc.0"
 }

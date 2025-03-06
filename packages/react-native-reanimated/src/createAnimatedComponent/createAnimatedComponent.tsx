@@ -135,7 +135,7 @@ export function createAnimatedComponent(
     _viewInfo?: ViewInfo;
     static displayName: string;
     static contextType = SkipEnteringContext;
-    context!: React.ContextType<typeof SkipEnteringContext>;
+    context: React.ContextType<typeof SkipEnteringContext> | null = null;
     reanimatedID = id++;
 
     constructor(props: AnimatedComponentProps<InitialComponentProps>) {

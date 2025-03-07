@@ -5,7 +5,6 @@ import type {
   ValueRotation,
   ShareableRef,
 } from '../commonTypes';
-import { checkCppVersion } from '../platform-specific/checkCppVersion';
 import { jsVersion } from '../platform-specific/jsVersion';
 import type { WorkletRuntime } from '../runtimes';
 import { getValueUnpackerCode } from '../valueUnpacker';
@@ -95,9 +94,6 @@ export class NativeReanimated {
         `Native part of Reanimated doesn't seem to be initialized.
 See https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#native-part-of-reanimated-doesnt-seem-to-be-initialized for more details.`
       );
-    }
-    if (__DEV__) {
-      checkCppVersion();
     }
     this.InnerNativeModule = global.__reanimatedModuleProxy;
   }

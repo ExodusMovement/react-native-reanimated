@@ -5,7 +5,8 @@
   "workspaces": {
     "packages": [
       "packages/react-native-reanimated",
-      "packages/react-native-reanimated/plugin"
+      "packages/react-native-reanimated/plugin",
+      "packages/eslint-plugin-reanimated"
     ]
   },
   "private": true,

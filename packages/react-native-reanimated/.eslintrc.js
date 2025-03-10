@@ -4,6 +4,10 @@ module.exports = {
   overrides: [
     {
       files: ['./src/**/*.ts', './src/**/*.tsx'],
+      plugins: ['reanimated'],
+      rules: {
+        'reanimated/use-reanimated-error': 'error',
+      },
     },
   ],
   ignorePatterns: ['lib'],

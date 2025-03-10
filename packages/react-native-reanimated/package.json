@@ -59,7 +59,9 @@
     "!__snapshots__",
     "!*.test.js",
     "!*.test.js.map",
-    "!**/node_modules"
+    "!**/node_modules",
+    "!**/*.map",
+    "!**/*.d.js"
   ],
   "repository": {
     "type": "git",

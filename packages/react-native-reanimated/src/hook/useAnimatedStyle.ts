@@ -114,22 +114,6 @@ function prepareAnimation(
   }
 }
 
-const safeAssign = (
-  obj: AnimatedStyle,
-  key: string | number,
-  value: Record<string, unknown> | []
-) => {
-  const descriptor = {
-    __proto__: null,
-    value,
-    writable: true,
-    enumerable: true,
-    configurable: true,
-  };
-  Object.defineProperty(obj, key, descriptor);
-  return obj;
-};
-
 function runAnimations(
   animation: AnimatedStyle<any>,
   timestamp: Timestamp,
@@ -141,6 +125,23 @@ function runAnimations(
   if (!animationsActive.value) {
     return true;
   }
+
+  const safeAssign = (
+    obj: AnimatedStyle,
+    field: string | number,
+    value: Record<string, unknown> | []
+  ) => {
+    const descriptor = {
+      __proto__: null,
+      value,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    };
+    Object.defineProperty(obj, field, descriptor);
+    return obj;
+  };
+
   if (Array.isArray(animation)) {
     safeAssign(result, key, []);
     let allFinished = true;

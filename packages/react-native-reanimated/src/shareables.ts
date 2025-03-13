@@ -201,7 +201,7 @@ Offending code was: \`${getWorkletCode(value)}\``);
           if (key === '__initData' && toAdapt.__initData !== undefined) {
             continue;
           }
-          if (key === '__reanimated_secretCodeWrapper') {
+          if (key === '__reanimated_workletCodeWrapper') {
             toAdapt[key] = NativeReanimatedModule.makeShareableClone(
               element,
               shouldPersistRemote,

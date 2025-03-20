@@ -116,9 +116,9 @@ const setNativeProps = (
 ): void => {
   if (isAnimatedProps) {
     const uiProps: Record<string, unknown> = {};
-    for (const key in newProps) {
+    for (const [key, value] of Object.entries(newProps)) {
       if (isNativeProp(key)) {
-        uiProps[key] = newProps[key];
+        uiProps[key] = value;
       }
     }
     // Only update UI props directly on the component,

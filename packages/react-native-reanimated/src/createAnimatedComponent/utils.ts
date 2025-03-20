@@ -30,8 +30,7 @@ export const has = <K extends string>(
     } else {
       if (typeof x === 'object')
         return Object.hasOwn(x, key)
-      else
-        return key in x;
+      return key in x;
     }
   }
   return false;

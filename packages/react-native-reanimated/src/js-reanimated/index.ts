@@ -76,7 +76,7 @@ export const _updatePropsJS = (
         acc[index][key] = value;
         return acc;
       },
-      [{}, {}]
+      [Object.create(null), Object.create(null)]
     );
 
     if (typeof component.setNativeProps === 'function') {

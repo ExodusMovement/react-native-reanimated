@@ -162,11 +162,12 @@ const updatePropsDOM = (
     });
   }
 
-  for (const key in domStyle) {
+
+  for (const [key, value] of Object.entries(domStyle)) {
     if (isAnimatedProps) {
-      (component as HTMLElement).setAttribute(key, domStyle[key]);
+      (component as HTMLElement).setAttribute(key, value as string);
     } else {
-      (component.style as StyleProps)[key] = domStyle[key];
+      (component.style as StyleProps)[key] = value;
     }
   }
 };

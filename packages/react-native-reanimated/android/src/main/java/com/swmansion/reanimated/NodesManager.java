@@ -437,25 +437,25 @@ public class NodesManager implements EventDispatcherListener {
     }
 
     switch (propName) {
-      case "opacity" -> {
+      case "opacity": {
         return Float.toString(view.getAlpha());
       }
-      case "zIndex" -> {
+      case "zIndex": {
         return Float.toString(view.getElevation());
       }
-      case "width" -> {
+      case "width": {
         return Float.toString(PixelUtil.toDIPFromPixel(view.getWidth()));
       }
-      case "height" -> {
+      case "height": {
         return Float.toString(PixelUtil.toDIPFromPixel(view.getHeight()));
       }
-      case "top" -> {
+      case "top": {
         return Float.toString(PixelUtil.toDIPFromPixel(view.getTop()));
       }
-      case "left" -> {
+      case "left": {
         return Float.toString(PixelUtil.toDIPFromPixel(view.getLeft()));
       }
-      case "backgroundColor" -> {
+      case "backgroundColor": {
         Drawable background = view.getBackground();
         try {
           Method getColor = background.getClass().getMethod("getColor");
@@ -469,7 +469,7 @@ public class NodesManager implements EventDispatcherListener {
           return "Unable to resolve background color";
         }
       }
-      default -> {
+      default: {
         throw new IllegalArgumentException(
             "[Reanimated] Attempted to get unsupported property "
                 + propName
@@ -489,13 +489,26 @@ public class NodesManager implements EventDispatcherListener {
     for (int i = 0; i < array.size(); i++) {
       ReadableType type = array.getType(i);
       switch (type) {
-        case Boolean -> copy.pushBoolean(array.getBoolean(i));
-        case String -> copy.pushString(array.getString(i));
-        case Null -> copy.pushNull();
-        case Number -> copy.pushDouble(array.getDouble(i));
-        case Map -> copy.pushMap(copyReadableMap(array.getMap(i)));
-        case Array -> copy.pushArray(copyReadableArray(array.getArray(i)));
-        default -> throw new IllegalStateException("[Reanimated] Unknown type of ReadableArray.");
+        case Boolean:
+          copy.pushBoolean(array.getBoolean(i));
+          break;
+        case String:
+          copy.pushString(array.getString(i));
+          break;
+        case Null:
+          copy.pushNull();
+          break;
+        case Number:
+          copy.pushDouble(array.getDouble(i));
+          break;
+        case Map:
+          copy.pushMap(copyReadableMap(array.getMap(i)));
+          break;
+        case Array:
+          copy.pushArray(copyReadableArray(array.getArray(i)));
+          break;
+        default:
+          throw new IllegalStateException("[Reanimated] Unknown type of ReadableArray.");
       }
     }
     return copy;

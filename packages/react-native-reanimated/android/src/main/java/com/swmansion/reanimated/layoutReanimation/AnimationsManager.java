@@ -353,7 +353,8 @@ public class AnimationsManager implements ViewHierarchyObserver {
 
     if (props.containsKey(Snapshot.TRANSFORM_MATRIX)) {
       float[] matrixValues = new float[9];
-      if (props.get(Snapshot.TRANSFORM_MATRIX) instanceof ReadableNativeArray matrixArray) {
+      if (props.get(Snapshot.TRANSFORM_MATRIX) instanceof ReadableNativeArray) {
+        ReadableNativeArray matrixArray = (ReadableNativeArray) props.get(Snapshot.TRANSFORM_MATRIX);
         // this array comes from JavaScript
         for (int i = 0; i < 9; i++) {
           matrixValues[i] = ((Double) matrixArray.getDouble(i)).floatValue();
@@ -537,7 +538,8 @@ public class AnimationsManager implements ViewHierarchyObserver {
     // we might want to keep this view around
     // because one of the (children's) children
     // has an exiting animation
-    if (view instanceof ViewGroup viewGroup) {
+    if (view instanceof ViewGroup) {
+      ViewGroup viewGroup = (ViewGroup) view;
       for (int i = viewGroup.getChildCount() - 1; i >= 0; i--) {
         View child = viewGroup.getChildAt(i);
         if (removeOrAnimateExitRecursive(child, shouldRemove, shouldAnimate)) {
@@ -587,7 +589,8 @@ public class AnimationsManager implements ViewHierarchyObserver {
 
   public void clearAnimationConfigRecursive(View view) {
     mNativeMethodsHolder.clearAnimationConfig(view.getId());
-    if (view instanceof ViewGroup viewGroup) {
+    if (view instanceof ViewGroup) {
+      ViewGroup viewGroup = (ViewGroup) view;
       for (int i = 0; i < viewGroup.getChildCount(); i++) {
         clearAnimationConfigRecursive(viewGroup.getChildAt(i));
       }
@@ -612,9 +615,12 @@ public class AnimationsManager implements ViewHierarchyObserver {
   }
 
   private void maybeDropAncestors(View exitingView) {
-    if (!(exitingView.getParent() instanceof View parent)) {
+    ViewParent parentObj = exitingView.getParent();
+    if (!(parentObj instanceof View)) {
       return;
     }
+    View parent = (View) parentObj;
+
     while (parent != null && !(parent instanceof RootView)) {
       View view = parent;
       parent = (View) view.getParent();

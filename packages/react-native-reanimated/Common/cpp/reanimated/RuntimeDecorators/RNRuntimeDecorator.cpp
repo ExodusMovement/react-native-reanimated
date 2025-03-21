@@ -8,7 +8,7 @@ void RNRuntimeDecorator::decorate(
     const std::shared_ptr<NativeReanimatedModule> &nativeReanimatedModule) {
   rnRuntime.global().setProperty(rnRuntime, "_WORKLET", false);
 
-  jsi::Runtime &uiRuntime = nativeReanimatedModule->getUIRuntime();
+  // jsi::Runtime &uiRuntime = nativeReanimatedModule->getUIRuntime();
 
 #ifdef RCT_NEW_ARCH_ENABLED
   constexpr auto isFabric = true;

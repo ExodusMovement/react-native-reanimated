@@ -6,7 +6,6 @@ import com.facebook.proguard.annotations.DoNotStrip;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.RuntimeExecutor;
 import com.facebook.react.bridge.queue.MessageQueueThread;
-import com.facebook.react.common.annotations.FrameworkAPI;
 import com.facebook.react.fabric.FabricUIManager;
 import com.facebook.react.turbomodule.core.CallInvokerHolderImpl;
 import com.facebook.react.uimanager.UIManagerHelper;
@@ -22,7 +21,7 @@ public class NativeProxy extends NativeProxyCommon {
   @SuppressWarnings("unused")
   private final HybridData mHybridData;
 
-  public @OptIn(markerClass = FrameworkAPI.class) NativeProxy(
+  public NativeProxy(
       ReactApplicationContext context, String valueUnpackerCode) {
     super(context);
     ReactFeatureFlagsWrapper.enableMountHooks();

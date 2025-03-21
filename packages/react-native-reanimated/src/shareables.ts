@@ -209,8 +209,7 @@ Offending code was: \`${getWorkletCode(value)}\``);
         }
         freezeObjectIfDev(value);
       } else if (value instanceof RegExp) {
-        // disabled, contact appsec if needed: https://github.com/ExodusMovement/exodus-mobile/pull/24699#issuecomment-2709694172
-/*        const pattern = value.source;
+        const pattern = value.source;
         const flags = value.flags;
         const handle = makeShareableCloneRecursive({
           __init: () => {
@@ -220,10 +219,6 @@ Offending code was: \`${getWorkletCode(value)}\``);
         });
         shareableMappingCache.set(value, handle);
         return handle as ShareableRef<T>;
-*/
-        throw new ReanimatedError(
-          'RegExp has been disabled. Contact AppSec if needed.'
-        );
       } else if (value instanceof Error) {
         const { name, message, stack } = value;
         const handle = makeShareableCloneRecursive({

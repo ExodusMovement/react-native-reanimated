@@ -7,7 +7,7 @@ export function flattenArray<T>(array: NestedArray<T>): T[] {
   }
 
   const result: T[] = [];
-  const stack = [array];
+  const stack: NestedArray<T>[] = [array];
 
   while (stack.length > 0) {
     const value = stack.pop()!;

@@ -21,7 +21,7 @@ export function flattenArray<T>(array: NestedArray<T>): T[] {
     }
   }
 
-  return result.reverse();
+  return result;
 }
 
 export const has = <K extends string>(

@@ -28,8 +28,9 @@ export const has = <K extends string>(
     if (x === null || x === undefined) {
       return false;
     } else {
-      if (typeof x === 'object')
+      if (typeof x === 'object') {
         return Object.hasOwn(x, key)
+      }
       return key in x;
     }
   }

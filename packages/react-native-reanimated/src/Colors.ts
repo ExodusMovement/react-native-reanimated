@@ -319,7 +319,15 @@ export function normalizeColor(color: unknown): number | null {
     return null;
   }
 
-  const input = color.trim();
+  let inputUntrimmed = color;
+  while (inputUntrimmed.includes('  ')) {
+    inputUntrimmed = inputUntrimmed.replace('  ', ' ');
+  }
+
+  const input = inputUntrimmed.trim();
+  if (input.length > 0 && inputUntrimmed[0] === ' ' && input[0] === '#') {
+    return null;
+  }
 
   function isAllHexDigits(str: string): boolean {
     for (let i = 0; i < str.length; i++) {
@@ -335,8 +343,39 @@ export function normalizeColor(color: unknown): number | null {
     return true;
   }
 
-  if (names[input.toLowerCase()] !== undefined) {
-    return names[input.toLowerCase()];
+  function isAllDigits(str: string): boolean {
+    for (let i = 0; i < str.length; i++) {
+      const c = str[i];
+      if (i === 0 && (c === '-' || c === '+')) {
+        continue;
+      }
+
+      const isNum = c >= '0' && c <= '9';
+      if (!isNum) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function isAllDigitsDot(str: string): boolean {
+    const newStr = str.replace('.', ''); // only remove one '.'
+    return isAllDigits(newStr);
+  }
+
+  function isPercentage(str: string): boolean {
+    if (!str.includes('%')) {
+      return false;
+    }
+    const digitDot = str.replace('%', '');
+    if (isAllDigitsDot(digitDot)) {
+      return true;
+    }
+    return false;
+  }
+
+  if (names[input] !== undefined) {
+    return names[input];
   }
 
   // #RRGGBB => 7 chars total, e.g. "#1a2B3C"
@@ -346,18 +385,28 @@ export function normalizeColor(color: unknown): number | null {
       return Number.parseInt(hexPart + 'ff', 16) >>> 0;
     }
   }
-
-  // rgb(R, G, B)
+  // rgb(R, G, B) or rgb(R G B)
   if (input.startsWith('rgb(') && input.endsWith(')')) {
     const inside = input.slice(4, -1).trim();
-    const parts = inside.split(',').map(p => p.trim());
-    if (parts.length === 3) {
-      const r = parse255(parts[0]);
-      const g = parse255(parts[1]);
-      const b = parse255(parts[2]);
-      if (r != null && g != null && b != null) {
-        return ((r << 24) | (g << 16) | (b << 8) | 0xff) >>> 0;
+    let parts = inside.split(',').map((p) => p.trim());
+
+    if (parts.length !== 3) {
+      parts = inside.split(' ').map((p) => p.trim());
+      if (parts.length !== 3) {
+        return null;
       }
+    }
+    for (const part of parts) {
+      if (!isAllDigitsDot(part)) {
+        return null;
+      }
+    }
+
+    const r = parse255(parts[0]);
+    const g = parse255(parts[1]);
+    const b = parse255(parts[2]);
+    if (r != null && g != null && b != null) {
+      return ((r << 24) | (g << 16) | (b << 8) | 0xff) >>> 0;
     }
   }
 
@@ -368,8 +417,20 @@ export function normalizeColor(color: unknown): number | null {
       // slash form
       const [beforeSlash, alphaPart] = inside.split('/');
       if (beforeSlash && alphaPart) {
-        const rgbParts = beforeSlash.trim().split(' ').map(x => x.trim());
+        const rgbParts = beforeSlash
+          .trim()
+          .split(' ')
+          .map((x) => x.trim());
         if (rgbParts.length === 3) {
+          for (const rgbPart of rgbParts) {
+            if (!isAllDigitsDot(rgbPart)) {
+              return null;
+            }
+          }
+          if (!isAllDigitsDot(alphaPart.trim())) {
+            return null;
+          }
+
           const r = parse255(rgbParts[0]);
           const g = parse255(rgbParts[1]);
           const b = parse255(rgbParts[2]);
@@ -381,8 +442,13 @@ export function normalizeColor(color: unknown): number | null {
       }
     } else {
       // comma form
-      const parts = inside.split(',').map(p => p.trim());
+      const parts = inside.split(',').map((p) => p.trim());
       if (parts.length === 4) {
+        for (const part of parts) {
+          if (!isAllDigitsDot(part)) {
+            return null;
+          }
+        }
         const r = parse255(parts[0]);
         const g = parse255(parts[1]);
         const b = parse255(parts[2]);
@@ -400,9 +466,12 @@ export function normalizeColor(color: unknown): number | null {
     if (shortHex.length === 3 && isAllHexDigits(shortHex)) {
       // Expand => "FF00cc" + "ff"
       const expanded =
-        shortHex[0] + shortHex[0] +
-        shortHex[1] + shortHex[1] +
-        shortHex[2] + shortHex[2] +
+        shortHex[0] +
+        shortHex[0] +
+        shortHex[1] +
+        shortHex[1] +
+        shortHex[2] +
+        shortHex[2] +
         'ff';
       return Number.parseInt(expanded, 16) >>> 0;
     }
@@ -421,26 +490,45 @@ export function normalizeColor(color: unknown): number | null {
     const shortHex = input.slice(1); // e.g. "F0cF"
     if (shortHex.length === 4 && isAllHexDigits(shortHex)) {
       const expanded =
-        shortHex[0] + shortHex[0] +
-        shortHex[1] + shortHex[1] +
-        shortHex[2] + shortHex[2] +
-        shortHex[3] + shortHex[3];
+        shortHex[0] +
+        shortHex[0] +
+        shortHex[1] +
+        shortHex[1] +
+        shortHex[2] +
+        shortHex[2] +
+        shortHex[3] +
+        shortHex[3];
       return Number.parseInt(expanded, 16) >>> 0;
     }
   }
 
-  // hsl(H, S%, L%)
+  // hsl(H, S%, L%) or hsl(H S% L%)
   if (input.startsWith('hsl(') && input.endsWith(')')) {
     const inside = input.slice(4, -1).trim();
-    const parts = inside.split(',').map(p => p.trim());
-    if (parts.length === 3) {
-      const h = parse360(parts[0]); // can be negative, wraps via mod
-      const s = parsePercentage(parts[1]);
-      const l = parsePercentage(parts[2]);
-      if (h != null && s != null && l != null) {
-        const rgb = hslToRgb(h, s, l);
-        return (rgb | 0xff) >>> 0; // alpha=255
+    let parts = inside.split(',').map((p) => p.trim());
+
+    if (parts.length !== 3) {
+      parts = inside.split(' ').map((p) => p.trim());
+      if (parts.length !== 3) {
+        return null;
       }
+    }
+    if (!isAllDigitsDot(parts[0])) {
+      return null;
+    }
+    if (!isPercentage(parts[1])) {
+      return null;
+    }
+    if (!isPercentage(parts[2])) {
+      return null;
+    }
+
+    const h = parse360(parts[0]); // can be negative, wraps via mod
+    const s = parsePercentage(parts[1]);
+    const l = parsePercentage(parts[2]);
+    if (h != null && s != null && l != null) {
+      const rgb = hslToRgb(h, s, l);
+      return (rgb | 0xff) >>> 0; // alpha=255
     }
   }
 
@@ -451,8 +539,24 @@ export function normalizeColor(color: unknown): number | null {
       // slash form => "H, S%, L% / A"
       const [beforeSlash, alphaPart] = inside.split('/');
       if (beforeSlash && alphaPart) {
-        const hslParts = beforeSlash.split(',').map(p => p.trim());
+        const hslParts = beforeSlash
+          .trim()
+          .split(' ')
+          .map((p) => p.trim());
         if (hslParts.length === 3) {
+          if (!isAllDigitsDot(hslParts[0])) {
+            return null;
+          }
+          if (!isPercentage(hslParts[1])) {
+            return null;
+          }
+          if (!isPercentage(hslParts[2])) {
+            return null;
+          }
+          if (!isAllDigitsDot(alphaPart.trim())) {
+            return null;
+          }
+
           const h = parse360(hslParts[0]);
           const s = parsePercentage(hslParts[1]);
           const l = parsePercentage(hslParts[2]);
@@ -465,8 +569,21 @@ export function normalizeColor(color: unknown): number | null {
       }
     } else {
       // comma form => "H, S%, L%, A"
-      const parts = inside.split(',').map(p => p.trim());
+      const parts = inside.split(',').map((p) => p.trim());
       if (parts.length === 4) {
+        if (!isAllDigitsDot(parts[0])) {
+          return null;
+        }
+        if (!isPercentage(parts[1])) {
+          return null;
+        }
+        if (!isPercentage(parts[2])) {
+          return null;
+        }
+        if (!isAllDigitsDot(parts[3])) {
+          return null;
+        }
+
         const h = parse360(parts[0]);
         const s = parsePercentage(parts[1]);
         const l = parsePercentage(parts[2]);
@@ -479,18 +596,33 @@ export function normalizeColor(color: unknown): number | null {
     }
   }
 
-  // hwb(H, W%, B%) – angle can be negative
+  // hwb(H, W%, B%) or hwb(H W% B%) -- angle can be negative
   if (input.startsWith('hwb(') && input.endsWith(')')) {
     const inside = input.slice(4, -1).trim();
-    const parts = inside.split(',').map(p => p.trim());
-    if (parts.length === 3) {
-      const h = parse360(parts[0]);
-      const w = parsePercentage(parts[1]);
-      const b = parsePercentage(parts[2]);
-      if (h != null && w != null && b != null) {
-        const rgb = hwbToRgb(h, w, b);
-        return (rgb | 0xff) >>> 0; // alpha=255
+    let parts = inside.split(',').map((p) => p.trim());
+
+    if (parts.length !== 3) {
+      parts = inside.split(' ').map((p) => p.trim());
+      if (parts.length !== 3) {
+        return null;
       }
+    }
+    if (!isAllDigitsDot(parts[0])) {
+      return null;
+    }
+    if (!isPercentage(parts[1])) {
+      return null;
+    }
+    if (!isPercentage(parts[2])) {
+      return null;
+    }
+
+    const h = parse360(parts[0]);
+    const w = parsePercentage(parts[1]);
+    const b = parsePercentage(parts[2]);
+    if (h != null && w != null && b != null) {
+      const rgb = hwbToRgb(h, w, b);
+      return (rgb | 0xff) >>> 0; // alpha=255
     }
   }
 

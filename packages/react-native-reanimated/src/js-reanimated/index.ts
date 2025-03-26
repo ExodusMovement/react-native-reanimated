@@ -76,7 +76,7 @@ export const _updatePropsJS = (
         acc[index][key] = value;
         return acc;
       },
-      [{}, {}]
+      [Object.create(null), Object.create(null)]
     );
 
     if (typeof component.setNativeProps === 'function') {
@@ -116,9 +116,9 @@ const setNativeProps = (
 ): void => {
   if (isAnimatedProps) {
     const uiProps: Record<string, unknown> = {};
-    for (const key in newProps) {
+    for (const [key, value] of Object.entries(newProps)) {
       if (isNativeProp(key)) {
-        uiProps[key] = newProps[key];
+        uiProps[key] = value;
       }
     }
     // Only update UI props directly on the component,
@@ -162,11 +162,12 @@ const updatePropsDOM = (
     });
   }
 
-  for (const key in domStyle) {
+
+  for (const [key, value] of Object.entries(domStyle)) {
     if (isAnimatedProps) {
-      (component as HTMLElement).setAttribute(key, domStyle[key]);
+      (component as HTMLElement).setAttribute(key, value as string);
     } else {
-      (component.style as StyleProps)[key] = domStyle[key];
+      (component.style as StyleProps)[key] = value;
     }
   }
 };

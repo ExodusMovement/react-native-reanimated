@@ -127,7 +127,7 @@ export type {
 export {
   BaseAnimationBuilder,
   ComplexAnimationBuilder,
-  Keyframe,
+/*  Keyframe, */ // disabled, contact appsec if needed: https://github.com/ExodusMovement/exodus-mobile/pull/24699#issuecomment-2709694172
   // Flip
   FlipInXUp,
   FlipInYLeft,

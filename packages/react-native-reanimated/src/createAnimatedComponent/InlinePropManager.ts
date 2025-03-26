@@ -41,7 +41,7 @@ function inlinePropsHasChanged(
 
 function getInlinePropsUpdate(inlineProps: Record<string, unknown>) {
   'worklet';
-  const update: Record<string, unknown> = {};
+  const update: Record<string, unknown> = Object.create(null);
   for (const [key, styleValue] of Object.entries(inlineProps)) {
     if (isSharedValue(styleValue)) {
       update[key] = styleValue.value;
@@ -63,7 +63,7 @@ function extractSharedValuesMapFromProps(
     Record<string, unknown> /* Initial component props */
   >
 ): Record<string, unknown> {
-  const inlineProps: Record<string, unknown> = {};
+  const inlineProps: Record<string, unknown> = Object.create(null);
 
   for (const key in props) {
     const value = props[key];
@@ -112,7 +112,7 @@ export function getInlineStyle(
   if (isFirstRender) {
     return getInlinePropsUpdate(style);
   }
-  const newStyle: StyleProps = {};
+  const newStyle: StyleProps = Object.create(null);
   for (const [key, styleValue] of Object.entries(style)) {
     if (
       !isSharedValue(styleValue) &&
@@ -127,7 +127,7 @@ export function getInlineStyle(
 export class InlinePropManager implements IInlinePropManager {
   _inlinePropsViewDescriptors: ViewDescriptorsSet | null = null;
   _inlinePropsMapperId: number | null = null;
-  _inlineProps: StyleProps = {};
+  _inlineProps: StyleProps = Object.create(null);
 
   public attachInlineProps(
     animatedComponent: React.Component<unknown, unknown> &

@@ -38,6 +38,15 @@ jsi::Function getCallGuard(jsi::Runtime &rt) {
 
 #endif // NDEBUG
 
+jsi::PropNameID workletCodePropName(jsi::Runtime &rt) {
+  jsi::Function symbolFor = rt.global()
+    .getPropertyAsObject(rt, "Symbol")
+    .getPropertyAsFunction(rt, "for");
+  jsi::Value val = symbolFor.call(rt, jsi::String::createFromAscii(rt, "__reanimated_workletCode"));
+  jsi::Symbol sym = val.asSymbol(rt);
+  return jsi::PropNameID::forSymbol(rt, sym);
+}
+
 jsi::Value makeShareableClone(
     jsi::Runtime &rt,
     const jsi::Value &value,
@@ -46,7 +55,12 @@ jsi::Value makeShareableClone(
   std::shared_ptr<Shareable> shareable;
   if (value.isObject()) {
     auto object = value.asObject(rt);
-    if (!object.getProperty(rt, "__workletHash").isUndefined()) {
+
+    jsi::PropNameID prop = workletCodePropName(rt);
+    if (object.hasProperty(rt, prop)) {
+      jsi::Value code = object.getProperty(rt, prop);
+      shareable = std::make_shared<ShareableString>(code.asString(rt).utf8(rt));
+    } else if (!object.getProperty(rt, "__workletHash").isUndefined()) {
       shareable = std::make_shared<ShareableWorklet>(rt, object);
     } else if (!object.getProperty(rt, "__init").isUndefined()) {
       shareable = std::make_shared<ShareableHandle>(rt, object);

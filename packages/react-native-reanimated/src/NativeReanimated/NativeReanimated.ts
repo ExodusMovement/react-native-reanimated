@@ -7,7 +7,6 @@ import type {
 } from '../commonTypes';
 import { jsVersion } from '../platform-specific/jsVersion';
 import type { WorkletRuntime } from '../runtimes';
-import { getValueUnpackerCode } from '../valueUnpacker';
 import { isFabric } from '../PlatformChecker';
 import type React from 'react';
 import { getShadowNodeWrapperFromRef } from '../fabricUtils';
@@ -86,8 +85,7 @@ export class NativeReanimated {
     }
     global._REANIMATED_VERSION_JS = jsVersion;
     if (global.__reanimatedModuleProxy === undefined) {
-      const valueUnpackerCode = getValueUnpackerCode();
-      ReanimatedModule?.installTurboModule(valueUnpackerCode);
+      ReanimatedModule?.installTurboModule('');
     }
     if (global.__reanimatedModuleProxy === undefined) {
       throw new ReanimatedError(

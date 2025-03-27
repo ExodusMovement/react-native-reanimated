@@ -2541,7 +2541,7 @@ exports[`babel plugin for react-native-gesture-handler transforms spread operato
 "var _jsxRuntime = require("react/jsx-runtime");
 function App() {
   return (0, _jsxRuntime.jsx)(Animated.View, {
-    style: [style, Object.assign({}, styles.container, {
+    style: [style, Object.assign(Object.create(null), styles.container, {
       width: function () {
         console.warn(require("react-native-reanimated").getUseOfValueInStyleWarning());
         return sharedValue.value;

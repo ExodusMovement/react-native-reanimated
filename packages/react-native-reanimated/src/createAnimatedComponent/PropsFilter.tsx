@@ -22,14 +22,14 @@ function dummyListener() {
 }
 
 export class PropsFilter implements IPropsFilter {
-  private _initialStyle = {};
+  private _initialStyle = Object.create(null);
 
   public filterNonAnimatedProps(
     component: React.Component<unknown, unknown> & IAnimatedComponentInternal
   ): Record<string, unknown> {
     const inputProps =
       component.props as AnimatedComponentProps<InitialComponentProps>;
-    const props: Record<string, unknown> = {};
+    const props: Record<string, unknown> = Object.create(null);
     for (const key in inputProps) {
       const value = inputProps[key];
       if (key === 'style') {

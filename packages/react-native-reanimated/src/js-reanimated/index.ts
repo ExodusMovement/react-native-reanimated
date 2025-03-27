@@ -115,7 +115,7 @@ const setNativeProps = (
   isAnimatedProps?: boolean
 ): void => {
   if (isAnimatedProps) {
-    const uiProps: Record<string, unknown> = {};
+    const uiProps: Record<string, unknown> = Object.create(null);
     for (const [key, value] of Object.entries(newProps)) {
       if (isNativeProp(key)) {
         uiProps[key] = value;
@@ -161,7 +161,6 @@ const updatePropsDOM = (
       textShadowRadius: domStyle.textShadowRadius,
     });
   }
-
 
   for (const [key, value] of Object.entries(domStyle)) {
     if (isAnimatedProps) {

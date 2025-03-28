@@ -1,5 +1,5 @@
 'use strict';
-import type { ShadowNodeWrapper } from '../commonTypes';
+// import type { ShadowNodeWrapper } from '../commonTypes';
 import {
   isChromeDebugger,
   isFabric,
@@ -36,29 +36,39 @@ export let dispatchCommand: DispatchCommand;
 function dispatchCommandFabric(
   animatedRef: AnimatedRefOnJS | AnimatedRefOnUI,
   commandName: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   args: Array<unknown> = []
 ) {
-  'worklet';
+  /*  'worklet';
   if (!_WORKLET) {
     return;
   }
 
   const shadowNodeWrapper = animatedRef() as ShadowNodeWrapper;
   global._dispatchCommandFabric!(shadowNodeWrapper, commandName, args);
+*/
+  logger.warn(
+    'dispatchCommand() is disabled: https://github.com/ExodusMovement/exodus-mobile/pull/24699. Contact AppSec if you need this.'
+  );
 }
 
 function dispatchCommandPaper(
   animatedRef: AnimatedRefOnJS | AnimatedRefOnUI,
   commandName: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   args: Array<unknown> = []
 ) {
-  'worklet';
+  /*  'worklet';
   if (!_WORKLET) {
     return;
   }
 
   const viewTag = animatedRef() as number;
   global._dispatchCommandPaper!(viewTag, commandName, args);
+*/
+  logger.warn(
+    'dispatchCommand() is disabled: https://github.com/ExodusMovement/exodus-mobile/pull/24699. Contact AppSec if you need this.'
+  );
 }
 
 function dispatchCommandJest() {

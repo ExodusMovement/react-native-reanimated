@@ -276,9 +276,27 @@ jsi::Value ShareableWorklet::toJSValue(jsi::Runtime &rt) {
           data_.cend(),
           [](const auto &item) { return item.first == "__workletHash"; }) &&
       "ShareableWorklet doesn't have `__workletHash` property");
+  // Copy the code & sourceURL from the worklet object to ensure
+  // that the code is not modified in the original object.
   jsi::Value obj = ShareableObject::toJSValue(rt);
+  auto initData = obj.asObject(rt).getProperty(rt, "__initData").asObject(rt);
+  auto code = std::make_shared<const jsi::StringBuffer>(
+      initData.getProperty(rt, "code").asString(rt).utf8(rt));
+  auto sourceURL = initData.getProperty(rt, "location").asString(rt).utf8(rt);
+  // The code has to be evaluated in the context of the worklet runtime.
+  // This is done by creating a new function that evaluates the code and
+  // returns the resulting function.
+  auto evaluateWorkletFunction = jsi::Function::createFromHostFunction(
+      rt,
+      jsi::PropNameID::forAscii(rt, "compileWorklet"),
+      0,
+      [&](jsi::Runtime &rt, const jsi::Value &, const jsi::Value *, size_t)
+          -> jsi::Value { return rt.evaluateJavaScript(code, sourceURL); });
   return getValueUnpacker(rt).call(
-      rt, obj, jsi::String::createFromAscii(rt, "Worklet"));
+      rt,
+      obj,
+      jsi::String::createFromAscii(rt, "Worklet"),
+      evaluateWorkletFunction);
 }
 
 jsi::Value ShareableRemoteFunction::toJSValue(jsi::Runtime &rt) {

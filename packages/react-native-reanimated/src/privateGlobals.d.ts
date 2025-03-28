@@ -32,9 +32,11 @@ declare global {
   var _REANIMATED_VERSION_JS: string | undefined;
   var __reanimatedModuleProxy: NativeReanimatedModule | undefined;
   var __callGuardDEV: typeof callGuardDEV | undefined;
-  var evalWithSourceMap:
-    | ((js: string, sourceURL: string, sourceMap: string) => any)
-    | undefined;
+  var evalFromHashValue: (
+    js: string,
+    sourceURL?: string,
+    sourceMap?: string
+  ) => any;
   var evalWithSourceUrl: ((js: string, sourceURL: string) => any) | undefined;
   var _log: (value: unknown) => void;
   var _toString: (value: unknown) => string;

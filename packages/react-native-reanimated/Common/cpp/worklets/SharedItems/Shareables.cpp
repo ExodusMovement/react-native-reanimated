@@ -1,4 +1,5 @@
 #include <worklets/SharedItems/Shareables.h>
+#include "WorkletStore.h"
 
 using namespace facebook;
 
@@ -57,9 +58,11 @@ jsi::Value makeShareableClone(
     auto object = value.asObject(rt);
 
     jsi::PropNameID prop = workletCodePropName(rt);
-    if (object.hasProperty(rt, prop)) {
-      jsi::Value code = object.getProperty(rt, prop);
-      shareable = std::make_shared<ShareableString>(code.asString(rt).utf8(rt));
+    if (object.hasProperty(rt, prop)) { // Worklet function
+      auto code = object.getProperty(rt, prop).asString(rt).utf8(rt);
+      double hash = object.getProperty(rt,jsi::String::createFromUtf8(rt,"hash")).asNumber();
+      WorkletStore::getInstance().set(hash, code);
+      shareable = std::make_shared<ShareableString>("");
     } else if (!object.getProperty(rt, "__workletHash").isUndefined()) {
       shareable = std::make_shared<ShareableWorklet>(rt, object);
     } else if (!object.getProperty(rt, "__init").isUndefined()) {

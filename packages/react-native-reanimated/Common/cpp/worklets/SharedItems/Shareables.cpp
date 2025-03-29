@@ -281,14 +281,14 @@ jsi::Value ShareableWorklet::toJSValue(jsi::Runtime &rt) {
   jsi::Value obj = ShareableObject::toJSValue(rt);
   auto initData = obj.asObject(rt).getProperty(rt, "__initData").asObject(rt);
   auto code = std::make_shared<const jsi::StringBuffer>(
-      initData.getProperty(rt, "code").asString(rt).utf8(rt));
+      "(" + initData.getProperty(rt, "code").asString(rt).utf8(rt) + "\n)");
   auto sourceURL = initData.getProperty(rt, "location").asString(rt).utf8(rt);
   // The code has to be evaluated in the context of the worklet runtime.
   // This is done by creating a new function that evaluates the code and
   // returns the resulting function.
   auto evaluateWorkletFunction = jsi::Function::createFromHostFunction(
       rt,
-      jsi::PropNameID::forAscii(rt, "compileWorklet"),
+      jsi::PropNameID::forAscii(rt, "evaluateWorkletFunction"),
       0,
       [&](jsi::Runtime &rt, const jsi::Value &, const jsi::Value *, size_t)
           -> jsi::Value { return rt.evaluateJavaScript(code, sourceURL); });
@@ -296,6 +296,7 @@ jsi::Value ShareableWorklet::toJSValue(jsi::Runtime &rt) {
       rt,
       obj,
       jsi::String::createFromAscii(rt, "Worklet"),
+      jsi::Value::undefined(),
       evaluateWorkletFunction);
 }
 

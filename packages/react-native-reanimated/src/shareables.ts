@@ -201,15 +201,15 @@ Offending code was: \`${getWorkletCode(value)}\``);
           if (key === '__initData' && toAdapt.__initData !== undefined) {
             continue;
           }
-          toAdapt[key] = makeShareableCloneRecursive(
-            element,
-            shouldPersistRemote,
-            depth + 1
-          );
-        }
-
-        for (const key of Object.getOwnPropertySymbols(value)) {
-          const element = value[key];
+          if (key === '__reanimated_workletCodeWrapper') {
+            toAdapt.__reanimated_workletCode =
+              NativeReanimatedModule.makeShareableClone(
+                element,
+                shouldPersistRemote,
+                value
+              );
+            continue;
+          }
           toAdapt[key] = makeShareableCloneRecursive(
             element,
             shouldPersistRemote,

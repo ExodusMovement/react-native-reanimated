@@ -55,12 +55,7 @@ jsi::Value makeShareableClone(
   std::shared_ptr<Shareable> shareable;
   if (value.isObject()) {
     auto object = value.asObject(rt);
-
-    jsi::PropNameID prop = workletCodePropName(rt);
-    if (object.hasProperty(rt, prop)) {
-      jsi::Value code = object.getProperty(rt, prop);
-      shareable = std::make_shared<ShareableString>(code.asString(rt).utf8(rt));
-    } else if (!object.getProperty(rt, "__workletHash").isUndefined()) {
+    if (!object.getProperty(rt, "__workletHash").isUndefined()) {
       shareable = std::make_shared<ShareableWorklet>(rt, object);
     } else if (!object.getProperty(rt, "__init").isUndefined()) {
       shareable = std::make_shared<ShareableHandle>(rt, object);
@@ -281,7 +276,8 @@ jsi::Value ShareableWorklet::toJSValue(jsi::Runtime &rt) {
   jsi::Value obj = ShareableObject::toJSValue(rt);
   auto initData = obj.asObject(rt).getProperty(rt, "__initData").asObject(rt);
   auto code = std::make_shared<const jsi::StringBuffer>(
-      "(" + initData.getProperty(rt, "code").asString(rt).utf8(rt) + "\n)");
+      "(" + initData.getProperty(rt, workletCodePropName(rt)).asString(rt).utf8(rt) + "\n)");
+
   auto sourceURL = initData.getProperty(rt, "location").asString(rt).utf8(rt);
   // The code has to be evaluated in the context of the worklet runtime.
   // This is done by creating a new function that evaluates the code and

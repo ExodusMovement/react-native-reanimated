@@ -53,29 +53,6 @@ void WorkletRuntimeDecorator::decorate(
 #endif // RCT_NEW_ARCH_ENABLED
   rt.global().setProperty(rt, "_IS_FABRIC", isFabric);
 
-#ifndef NDEBUG
-  auto evalWithSourceUrl = [](jsi::Runtime &rt,
-                              const jsi::Value &thisValue,
-                              const jsi::Value *args,
-                              size_t count) -> jsi::Value {
-    auto code = std::make_shared<const jsi::StringBuffer>(
-        args[0].asString(rt).utf8(rt));
-    std::string url;
-    if (count > 1 && args[1].isString()) {
-      url = args[1].asString(rt).utf8(rt);
-    }
-    return rt.evaluateJavaScript(code, url);
-  };
-  rt.global().setProperty(
-      rt,
-      "evalWithSourceUrl",
-      jsi::Function::createFromHostFunction(
-          rt,
-          jsi::PropNameID::forAscii(rt, "evalWithSourceUrl"),
-          1,
-          evalWithSourceUrl));
-#endif // NDEBUG
-
   jsi_utils::installJsiFunction(
       rt, "_toString", [](jsi::Runtime &rt, const jsi::Value &value) {
         return jsi::String::createFromUtf8(rt, stringifyJSIValue(rt, value));

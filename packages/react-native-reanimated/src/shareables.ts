@@ -201,14 +201,15 @@ Offending code was: \`${getWorkletCode(value)}\``);
           if (key === '__initData' && toAdapt.__initData !== undefined) {
             continue;
           }
-          if (key === '__reanimated_workletCodeWrapper') {
-            toAdapt[key] = NativeReanimatedModule.makeShareableClone(
-              element,
-              shouldPersistRemote,
-              value
-            );
-            continue;
-          }
+          toAdapt[key] = makeShareableCloneRecursive(
+            element,
+            shouldPersistRemote,
+            depth + 1
+          );
+        }
+
+        for (const key of Object.getOwnPropertySymbols(value)) {
+          const element = value[key];
           toAdapt[key] = makeShareableCloneRecursive(
             element,
             shouldPersistRemote,
@@ -218,7 +219,7 @@ Offending code was: \`${getWorkletCode(value)}\``);
         freezeObjectIfDev(value);
       } else if (value instanceof RegExp) {
         // disabled, contact appsec if needed: https://github.com/ExodusMovement/exodus-mobile/pull/24699#issuecomment-2709694172
-/*        const pattern = value.source;
+        /*        const pattern = value.source;
         const flags = value.flags;
         const handle = makeShareableCloneRecursive({
           __init: () => {

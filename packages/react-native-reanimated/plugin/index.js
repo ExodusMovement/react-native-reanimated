@@ -461,10 +461,7 @@ var require_workletFactory = __commonJS({
       const initDataId = pathForStringDefinitions.parentPath.scope.generateUidIdentifier(`worklet_${workletHash}_init_data`);
       const symbolForWorkletCode = (0, types_12.callExpression)((0, types_12.memberExpression)((0, types_12.identifier)("Symbol"), (0, types_12.identifier)("for")), [(0, types_12.stringLiteral)("__reanimated_workletCode")]);
       const workletCodeProperty = (0, types_12.objectProperty)(symbolForWorkletCode, (0, types_12.stringLiteral)(funString), true);
-      const reanimatedSecretCodeProperty = (0, types_12.objectProperty)((0, types_12.identifier)("__reanimated_workletCodeWrapper"), (0, types_12.objectExpression)([workletCodeProperty]));
-      const initDataObjectExpression = (0, types_12.objectExpression)([
-        reanimatedSecretCodeProperty
-      ]);
+      const initDataObjectExpression = (0, types_12.objectExpression)([workletCodeProperty]);
       const shouldInjectLocation = !(0, utils_1.isRelease)();
       if (shouldInjectLocation) {
         let location = state.file.opts.filename;

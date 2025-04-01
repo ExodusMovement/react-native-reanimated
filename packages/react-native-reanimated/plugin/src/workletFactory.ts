@@ -153,13 +153,13 @@ export function makeWorkletFactory(
     true
   );
 
-  const reanimatedSecretCodeProperty = objectProperty(
+  const reanimatedWorkletCodeProperty = objectProperty(
     identifier('__reanimated_workletCodeWrapper'),
     objectExpression([workletCodeProperty])
   );
 
   const initDataObjectExpression = objectExpression([
-    reanimatedSecretCodeProperty,
+    reanimatedWorkletCodeProperty,
   ]);
 
   // When testing with jest I noticed that environment variables are set later

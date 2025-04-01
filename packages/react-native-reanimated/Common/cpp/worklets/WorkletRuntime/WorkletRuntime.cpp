@@ -51,11 +51,6 @@ static std::shared_ptr<jsi::Runtime> makeRuntime(
   }
 }
 
-
-std::string getJsValueUnpackerString() {
-  return "(function valueUnpacker_Exodus_valueUnpackerJs1(objectToUnpack,category,remoteFunctionName){let workletsCache=global.__workletsCache;let handleCache=global.__handleCache;if(workletsCache===undefined){workletsCache=global.__workletsCache=new Map();handleCache=global.__handleCache=new WeakMap();}const workletHash=objectToUnpack.__workletHash;if(workletHash!==undefined){let workletFun=workletsCache.get(workletHash);if(workletFun===undefined){const initData=objectToUnpack.__initData;if(global.evalWithSourceMap){workletFun=global.evalWithSourceMap('('+initData.__reanimated_workletCodeWrapper+'\\n)',initData.location,initData.sourceMap);}else if(global.evalWithSourceUrl){workletFun=global.evalWithSourceUrl('('+initData.__reanimated_workletCodeWrapper+'\\n)',\"worklet_\"+workletHash);}else{workletFun=eval('('+initData.__reanimated_workletCodeWrapper+'\\n)');}workletsCache.set(workletHash,workletFun);}const functionInstance=workletFun.bind(objectToUnpack);objectToUnpack._recur=functionInstance;return functionInstance;}else if(objectToUnpack.__init!==undefined){let value=handleCache.get(objectToUnpack);if(value===undefined){value=objectToUnpack.__init();handleCache.set(objectToUnpack,value);}return value;}else if(category==='RemoteFunction'){const fun=function(){const label=remoteFunctionName?\"function \"+remoteFunctionName:'anonymous function';throw new Error(\"[Reanimated] Tried to synchronously call a non-worklet \"+label+\" on the UI thread.\\nSee https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#tried-to-synchronously-call-a-non-worklet-function-on-the-ui-thread for more details.\");};fun.__remoteFunction=objectToUnpack;return fun;}else{throw new Error(\"[Reanimated] Data type in category \"+category+\" not recognized by value unpacker: \"+_toString(objectToUnpack)+\".\");}}\n)";
-}
-
 WorkletRuntime::WorkletRuntime(
     jsi::Runtime &rnRuntime,
     const std::shared_ptr<MessageQueueThread> &jsQueue,
@@ -78,7 +73,8 @@ WorkletRuntime::WorkletRuntime(
   WorkletRuntimeCollector::install(rt);
   WorkletRuntimeDecorator::decorate(rt, name, jsScheduler);
 
-  auto codeBuffer = std::make_shared<const jsi::StringBuffer>(getJsValueUnpackerString());
+  auto codeBuffer = std::make_shared<const jsi::StringBuffer>(
+      "(" + valueUnpackerCode + "\n)");
   auto valueUnpacker = rt.evaluateJavaScript(codeBuffer, "valueUnpacker")
                            .asObject(rt)
                            .asFunction(rt);

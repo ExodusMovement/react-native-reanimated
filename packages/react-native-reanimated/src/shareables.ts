@@ -36,6 +36,18 @@ function isPlainJSObject(object: object) {
   return Object.getPrototypeOf(object) === Object.prototype;
 }
 
+const assignReadOnly = (obj: object, key: PropertyKey, value: ShareableRef<unknown>) => {
+  const descriptor = {
+    __proto__: null,
+    value,
+    writable: false,
+    enumerable: true,
+    configurable: false,
+  };
+  Object.defineProperty(obj, key, descriptor);
+  return obj;
+};
+
 // The below object is used as a replacement for objects that cannot be transferred
 // as shareable values. In makeShareableCloneRecursive we detect if an object is of
 // a plain Object.prototype and only allow such objects to be transferred. This lets
@@ -164,7 +176,7 @@ export function makeShareableCloneRecursive<T>(
         shareableMappingCache.set(value, handle);
         return handle as ShareableRef<T>;
       } else if (isPlainJSObject(value) || isTypeFunction) {
-        toAdapt = {};
+        toAdapt = Object.create(null);
         if (isWorkletFunction(value)) {
           if (__DEV__) {
             const babelVersion = value.__initData.version;
@@ -190,11 +202,11 @@ Offending code was: \`${getWorkletCode(value)}\``);
           // that the __initData field that contains long strings representing the
           // worklet code, source map, and location, will always be
           // serialized/deserialized once.
-          toAdapt.__initData = makeShareableCloneRecursive(
+          assignReadOnly(toAdapt, '__initData', makeShareableCloneRecursive(
             value.__initData,
             true,
             depth + 1
-          );
+          ));
         }
 
         for (const [key, element] of Object.entries(value)) {
@@ -202,19 +214,18 @@ Offending code was: \`${getWorkletCode(value)}\``);
             continue;
           }
           if (key === '__reanimated_workletCodeWrapper') {
-            toAdapt.__reanimated_workletCode =
-              NativeReanimatedModule.makeShareableClone(
-                element,
-                shouldPersistRemote,
-                value
-              );
+            assignReadOnly(toAdapt, '__reanimated_workletCode', NativeReanimatedModule.makeShareableClone(
+              element,
+              shouldPersistRemote,
+              value
+            ));
             continue;
           }
-          toAdapt[key] = makeShareableCloneRecursive(
+          assignReadOnly(toAdapt, key, makeShareableCloneRecursive(
             element,
             shouldPersistRemote,
             depth + 1
-          );
+          ));
         }
         freezeObjectIfDev(value);
       } else if (value instanceof RegExp) {

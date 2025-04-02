@@ -39,6 +39,7 @@
   "files": [
     "Common/",
     "lib/",
+    "src/specs/",
     "android/src/main/AndroidManifest.xml",
     "android/src/main/java/",
     "android/build.gradle",

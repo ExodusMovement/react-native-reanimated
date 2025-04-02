@@ -28,13 +28,13 @@ void UIRuntimeDecorator::decorate(
   jsi_utils::installJsiFunction(uiRuntime, "_updatePropsFabric", updateProps);
   jsi_utils::installJsiFunction(
       uiRuntime, "_removeFromPropsRegistry", removeFromPropsRegistry);
-//  jsi_utils::installJsiFunction(
-//      uiRuntime, "_dispatchCommandFabric", dispatchCommand);
+  jsi_utils::installJsiFunction(
+      uiRuntime, "_dispatchCommandFabric", dispatchCommand);
   jsi_utils::installJsiFunction(uiRuntime, "_measureFabric", measure);
 #else
   jsi_utils::installJsiFunction(uiRuntime, "_updatePropsPaper", updateProps);
-//  jsi_utils::installJsiFunction(
-//      uiRuntime, "_dispatchCommandPaper", dispatchCommand);
+  jsi_utils::installJsiFunction(
+      uiRuntime, "_dispatchCommandPaper", dispatchCommand);
   jsi_utils::installJsiFunction(uiRuntime, "_scrollToPaper", scrollTo);
   jsi_utils::installJsiFunction(
       uiRuntime,

@@ -522,7 +522,7 @@ dependencies {
     implementation "com.facebook.react:react-android" // version substituted by RNGP
     if (JS_RUNTIME == "hermes") {
         if (System.getenv("BUILD_TYPE") == "release") {
-          def hermesPath = "../../@exodus/hermes-engine/android/";
+          def hermesPath = "../../../@exodus/hermes-engine/android/";
           releaseImplementation files(hermesPath + "hermes-release.aar")
         } else {
           implementation("com.facebook.react:hermes-android")

@@ -522,10 +522,13 @@ dependencies {
     implementation "com.facebook.react:react-android" // version substituted by RNGP
     if (JS_RUNTIME == "hermes") {
         if (System.getenv("BUILD_TYPE") == "release") {
+          // Worklets compilation requires the hermes-engine headers
+          // swap out the hermes-engine with our own prebuilt version
+          // for release builds.
           def hermesPath = "../../../@exodus/hermes-engine/android/";
-          releaseImplementation files(hermesPath + "hermes-release.aar")
+          compileOnly files(hermesPath + "hermes-release.aar")
         } else {
-          implementation("com.facebook.react:hermes-android")
+          compileOnly("com.facebook.react:hermes-android")
         }
     }
 }

@@ -282,7 +282,12 @@ jsi::Value ShareableWorklet::toJSValue(jsi::Runtime &rt) {
   auto code = std::make_shared<const jsi::StringBuffer>(
       "(" + initData.getProperty(rt, "__reanimated_workletCode").asString(rt).utf8(rt) + "\n)");
 
-  auto sourceURL = initData.getProperty(rt, "location").asString(rt).utf8(rt);
+  std::string sourceURL = "unknown.js";
+  auto locationValue = initData.getProperty(rt, "location");
+  if (locationValue.isString()) {
+    sourceURL = locationValue.asString(rt).utf8(rt);
+  }
+
   // The code has to be evaluated in the context of the worklet runtime.
   // This is done by creating a new function that evaluates the code and
   // returns the resulting function.

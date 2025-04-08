@@ -273,7 +273,7 @@ android {
             // We'll let the build system to resolve the version of CMake
             // but keeping this here as a reminder that you should actually
             // match the version being used in the React Native repo
-            // version = System.getenv("CMAKE_VERSION") ?: "3.22.1"
+            version = System.getenv("CMAKE_VERSION") ?: "3.22.1"
             path "CMakeLists.txt"
         }
     }
@@ -522,10 +522,13 @@ dependencies {
     implementation "com.facebook.react:react-android" // version substituted by RNGP
     if (JS_RUNTIME == "hermes") {
         if (System.getenv("BUILD_TYPE") == "release") {
+          // Worklets compilation requires the hermes-engine headers
+          // swap out the hermes-engine with our own prebuilt version
+          // for release builds.
           def hermesPath = "../../../@exodus/hermes-engine/android/";
-          releaseImplementation files(hermesPath + "hermes-release.aar")
+          compileOnly files(hermesPath + "hermes-release.aar")
         } else {
-          implementation("com.facebook.react:hermes-android")
+          compileOnly("com.facebook.react:hermes-android")
         }
     }
 }

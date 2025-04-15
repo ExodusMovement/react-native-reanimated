@@ -1,14 +1,9 @@
 'use strict';
 import NativeReanimatedModule from './NativeReanimated';
 import { isWorkletFunction } from './commonTypes';
-import type {
-  ShareableRef,
-  FlatShareableRef,
-  WorkletFunction,
-} from './commonTypes';
+import type { ShareableRef, FlatShareableRef } from './commonTypes';
 import { shouldBeUseWeb } from './PlatformChecker';
 import { ReanimatedError, registerWorkletStackDetails } from './errors';
-import { jsVersion } from './platform-specific/jsVersion';
 import {
   shareableMappingCache,
   shareableMappingFlag,
@@ -36,7 +31,11 @@ function isPlainJSObject(object: object) {
   return Object.getPrototypeOf(object) === Object.prototype;
 }
 
-const assignReadOnly = (obj: object, key: PropertyKey, value: ShareableRef<unknown>) => {
+const assignReadOnly = (
+  obj: object,
+  key: PropertyKey,
+  value: ShareableRef<unknown>
+) => {
   const descriptor = {
     __proto__: null,
     value,
@@ -179,12 +178,6 @@ export function makeShareableCloneRecursive<T>(
         toAdapt = Object.create(null);
         if (isWorkletFunction(value)) {
           if (__DEV__) {
-            const babelVersion = value.__initData.version;
-            if (babelVersion !== undefined && babelVersion !== jsVersion) {
-              throw new ReanimatedError(`Mismatch between JavaScript code version and Reanimated Babel plugin version (${jsVersion} vs. ${babelVersion}).        
-See \`https://docs.swmansion.com/react-native-reanimated/docs/guides/troubleshooting#mismatch-between-javascript-code-version-and-reanimated-babel-plugin-version\` for more details.
-Offending code was: \`${getWorkletCode(value)}\``);
-            }
             registerWorkletStackDetails(
               value.__workletHash,
               value.__stackDetails!
@@ -202,11 +195,11 @@ Offending code was: \`${getWorkletCode(value)}\``);
           // that the __initData field that contains long strings representing the
           // worklet code, source map, and location, will always be
           // serialized/deserialized once.
-          assignReadOnly(toAdapt, '__initData', makeShareableCloneRecursive(
-            value.__initData,
-            true,
-            depth + 1
-          ));
+          assignReadOnly(
+            toAdapt,
+            '__initData',
+            makeShareableCloneRecursive(value.__initData, true, depth + 1)
+          );
         }
 
         for (const [key, element] of Object.entries(value)) {
@@ -214,18 +207,22 @@ Offending code was: \`${getWorkletCode(value)}\``);
             continue;
           }
           if (key === '__reanimated_workletCodeWrapper') {
-            assignReadOnly(toAdapt, '__reanimated_workletCode', NativeReanimatedModule.makeShareableClone(
-              element,
-              shouldPersistRemote,
-              value
-            ));
+            assignReadOnly(
+              toAdapt,
+              '__reanimated_workletCode',
+              NativeReanimatedModule.makeShareableClone(
+                element,
+                shouldPersistRemote,
+                value
+              )
+            );
             continue;
           }
-          assignReadOnly(toAdapt, key, makeShareableCloneRecursive(
-            element,
-            shouldPersistRemote,
-            depth + 1
-          ));
+          assignReadOnly(
+            toAdapt,
+            key,
+            makeShareableCloneRecursive(element, shouldPersistRemote, depth + 1)
+          );
         }
         freezeObjectIfDev(value);
       } else if (value instanceof RegExp) {
@@ -313,20 +310,6 @@ Offending code was: \`${getWorkletCode(value)}\``);
     shouldPersistRemote,
     undefined
   );
-}
-
-const WORKLET_CODE_THRESHOLD = 255;
-
-function getWorkletCode(value: WorkletFunction) {
-  // @ts-ignore this is fine
-  const code = value?.__initData?.code;
-  if (!code) {
-    return 'unknown';
-  }
-  if (code.length > WORKLET_CODE_THRESHOLD) {
-    return `${code.substring(0, WORKLET_CODE_THRESHOLD)}...`;
-  }
-  return code;
 }
 
 type RemoteFunction<T> = {

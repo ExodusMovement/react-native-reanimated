@@ -56,7 +56,7 @@ jsi::Value makeShareableClone(
   if (value.isObject()) {
     auto object = value.asObject(rt);
     jsi::PropNameID prop = workletCodePropName(rt);
-    if (object.hasProperty(rt, prop)) {
+    if (object.hasProperty(rt, prop) && object.getPropertyNames(rt).length(rt) == 0) {
       jsi::Value code = object.getProperty(rt, prop);
       shareable = std::make_shared<ShareableString>(code.asString(rt).utf8(rt));
     } else if (!object.getProperty(rt, "__workletHash").isUndefined()) {

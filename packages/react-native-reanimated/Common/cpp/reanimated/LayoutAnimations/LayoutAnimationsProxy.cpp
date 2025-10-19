@@ -153,7 +153,7 @@ void LayoutAnimationsProxy::parseRemoveMutations(
     if (mutation.type == ShadowViewMutation::Remove) {
       updateIndexForMutation(mutation);
       auto tag = mutation.oldChildShadowView.tag;
-      auto parentTag = mutation.parentShadowView.tag;
+      auto parentTag = mutation.parentTag;
       auto unflattenedParentTag = parentTag; // temporary
 
       std::shared_ptr<MutationNode> mutationNode;
@@ -287,8 +287,8 @@ void LayoutAnimationsProxy::handleUpdatesAndEnterings(
       }
       case ShadowViewMutation::Type::Insert: {
         updateIndexForMutation(mutation);
-        if (nodeForTag_.contains(mutation.parentShadowView.tag)) {
-          nodeForTag_[mutation.parentShadowView.tag]->applyMutationToIndices(
+        if (nodeForTag_.contains(mutation.parentTag)) {
+          nodeForTag_[mutation.parentTag]->applyMutationToIndices(
               mutation);
         }
 
@@ -297,7 +297,7 @@ void LayoutAnimationsProxy::handleUpdatesAndEnterings(
           if (layoutAnimationIt == layoutAnimations_.end()) {
             if (oldShadowViewsForReparentings.contains(tag)) {
               filteredMutations.push_back(ShadowViewMutation::InsertMutation(
-                  mutation.parentShadowView,
+                  mutation.parentTag,
                   oldShadowViewsForReparentings[tag],
                   mutation.index));
             } else {
@@ -308,7 +308,7 @@ void LayoutAnimationsProxy::handleUpdatesAndEnterings(
 
           auto oldView = *layoutAnimationIt->second.currentView;
           filteredMutations.push_back(ShadowViewMutation::InsertMutation(
-              mutation.parentShadowView, oldView, mutation.index));
+              mutation.parentTag, oldView, mutation.index));
           continue;
         }
 
@@ -328,7 +328,7 @@ void LayoutAnimationsProxy::handleUpdatesAndEnterings(
             cloneViewWithoutOpacity(mutation, propsParserContext);
 
         filteredMutations.push_back(ShadowViewMutation::UpdateMutation(
-            mutation.newChildShadowView, *newView, mutation.parentShadowView));
+            mutation.newChildShadowView, *newView, mutation.parentTag));
         break;
       }
 
@@ -386,7 +386,7 @@ void LayoutAnimationsProxy::addOngoingAnimations(
     updateLayoutMetrics(newView->layoutMetrics, updateValues.frame);
 
     mutations.push_back(ShadowViewMutation::UpdateMutation(
-        *layoutAnimation.currentView, *newView, *layoutAnimation.parentView));
+        *layoutAnimation.currentView, *newView, layoutAnimation.parentTag));
     layoutAnimation.currentView = newView;
   }
   updateMap.clear();
@@ -556,11 +556,11 @@ void LayoutAnimationsProxy::updateIndexForMutation(
   if (mutation.index == -1) {
     return;
   }
-  if (!nodeForTag_.contains(mutation.parentShadowView.tag)) {
+  if (!nodeForTag_.contains(mutation.parentTag)) {
     return;
   }
 
-  auto parent = nodeForTag_[mutation.parentShadowView.tag];
+  auto parent = nodeForTag_[mutation.parentTag];
 
   int size = 0, prevIndex = -1, offset = 0;
 
@@ -577,7 +577,7 @@ void LayoutAnimationsProxy::updateIndexForMutation(
       ? mutation.newChildShadowView.tag
       : mutation.oldChildShadowView.tag;
   LOG(INFO) << "update index for " << tag << " in "
-            << mutation.parentShadowView.tag << ": " << mutation.index << " -> "
+            << mutation.parentTag << ": " << mutation.index << " -> "
             << mutation.index + offset << std::endl;
 #endif
   mutation.index += offset;
@@ -606,9 +606,8 @@ void LayoutAnimationsProxy::createLayoutAnimation(
           ? mutation.oldChildShadowView
           : mutation.newChildShadowView);
   auto currentView = std::make_shared<ShadowView>(oldView);
-  auto parentView = std::make_shared<ShadowView>(mutation.parentShadowView);
   layoutAnimations_.insert_or_assign(
-      tag, LayoutAnimation{finalView, currentView, parentView, {}, count});
+      tag, LayoutAnimation{finalView, currentView, mutation.parentTag, {}, count});
 }
 
 void LayoutAnimationsProxy::startEnteringAnimation(
@@ -619,19 +618,18 @@ void LayoutAnimationsProxy::startEnteringAnimation(
 #endif
   auto finalView = std::make_shared<ShadowView>(mutation.newChildShadowView);
   auto current = std::make_shared<ShadowView>(mutation.newChildShadowView);
-  auto parent = std::make_shared<ShadowView>(mutation.parentShadowView);
 
   auto &viewProps =
       static_cast<const ViewProps &>(*mutation.newChildShadowView.props);
   auto opacity = viewProps.opacity;
 
   uiScheduler_->scheduleOnUI(
-      [finalView, current, parent, mutation, opacity, this, tag]() {
+      [finalView, current, mutation, opacity, this, tag]() {
         Rect window{};
         {
           auto lock = std::unique_lock<std::recursive_mutex>(mutex);
           layoutAnimations_.insert_or_assign(
-              tag, LayoutAnimation{finalView, current, parent, opacity});
+              tag, LayoutAnimation{finalView, current, mutation.parentTag, opacity});
           window =
               surfaceManager.getWindow(mutation.newChildShadowView.surfaceId);
         }
@@ -784,13 +782,13 @@ void LayoutAnimationsProxy::maybeRestoreOpacity(
 void LayoutAnimationsProxy::maybeUpdateWindowDimensions(
     facebook::react::ShadowViewMutation &mutation,
     SurfaceId surfaceId) const {
-  // This is a hacky way to obtain the window dimensions.
-  // We can identify the root, by checking if its tag is equal to the surfaceId
-  if (mutation.parentShadowView.tag == surfaceId) {
+  if (mutation.type == ShadowViewMutation::Update &&
+      !std::strcmp(
+          mutation.oldChildShadowView.componentName, RootComponentName)) {
     surfaceManager.updateWindow(
         surfaceId,
-        mutation.parentShadowView.layoutMetrics.frame.size.width,
-        mutation.parentShadowView.layoutMetrics.frame.size.height);
+        mutation.newChildShadowView.layoutMetrics.frame.size.width,
+        mutation.newChildShadowView.layoutMetrics.frame.size.height);
   }
 }
 

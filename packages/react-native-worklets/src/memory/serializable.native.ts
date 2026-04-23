@@ -379,12 +379,28 @@ function cloneNull(): SerializableRef<null> {
   return WorkletsModule.createSerializableNull();
 }
 
+const assignReadOnly = (
+  obj: Record<string, unknown>,
+  key: string,
+  value: unknown
+) => {
+  const descriptor = {
+    __proto__: null,
+    value,
+    writable: false,
+    enumerable: true,
+    configurable: false,
+  };
+  Object.defineProperty(obj, key, descriptor);
+  return obj;
+};
+
 function cloneObjectProperties<T extends object>(
   value: T,
   shouldPersistRemote: boolean,
   depth: number
 ): Record<string, unknown> {
-  const clonedProps: Record<string, unknown> = {};
+  const clonedProps: Record<string, unknown> = Object.create(null);
   for (const [key, element] of Object.entries(value)) {
     // We don't need to clone __initData field as it contains long strings
     // representing the worklet code, source map, and location, and we will
@@ -392,10 +408,22 @@ function cloneObjectProperties<T extends object>(
     if (key === '__initData' && clonedProps.__initData !== undefined) {
       continue;
     }
-    clonedProps[key] = createSerializable(
-      element,
-      shouldPersistRemote,
-      depth + 1
+    if (key === '__reanimated_workletCodeWrapper') {
+      assignReadOnly(
+        clonedProps,
+        '__reanimated_workletCode',
+        WorkletsModule.createSerializable(
+          element,
+          shouldPersistRemote,
+          value
+        )
+      );
+      continue;
+    }
+    assignReadOnly(
+      clonedProps,
+      key,
+      createSerializable(element, shouldPersistRemote, depth + 1)
     );
   }
   return clonedProps;
@@ -491,10 +519,10 @@ function cloneWorklet<TValue extends WorkletFunction>(
   // that the __initData field that contains long strings representing the
   // worklet code, source map, and location, will always be
   // serialized/deserialized once.
-  clonedProps.__initData = createSerializable(
-    value.__initData,
-    true,
-    depth + 1
+  assignReadOnly(
+    clonedProps,
+    '__initData',
+    createSerializable(value.__initData, true, depth + 1)
   );
 
   const clone = WorkletsModule.createSerializableWorklet(

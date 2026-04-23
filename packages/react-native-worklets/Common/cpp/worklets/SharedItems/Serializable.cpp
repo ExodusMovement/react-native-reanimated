@@ -10,6 +10,15 @@ using namespace facebook;
 
 namespace worklets {
 
+jsi::PropNameID workletCodePropName(jsi::Runtime &rt) {
+  jsi::Function symbolFor = rt.global()
+    .getPropertyAsObject(rt, "Symbol")
+    .getPropertyAsFunction(rt, "for");
+  jsi::Value val = symbolFor.call(rt, jsi::String::createFromAscii(rt, "__reanimated_workletCode"));
+  jsi::Symbol sym = val.asSymbol(rt);
+  return jsi::PropNameID::forSymbol(rt, sym);
+}
+
 jsi::Function getValueUnpacker(jsi::Runtime &rt) {
   auto valueUnpacker = rt.global().getProperty(rt, "__valueUnpacker");
   react_native_assert(valueUnpacker.isObject() && "valueUnpacker not found");
@@ -24,7 +33,11 @@ jsi::Value makeSerializableClone(
   std::shared_ptr<Serializable> serializable;
   if (value.isObject()) {
     auto object = value.asObject(rt);
-    if (!object.getProperty(rt, "__workletHash").isUndefined()) {
+    jsi::PropNameID prop = workletCodePropName(rt);
+    if (object.hasProperty(rt, prop)) {
+      jsi::Value code = object.getProperty(rt, prop);
+      serializable = std::make_shared<SerializableString>(code.asString(rt).utf8(rt));
+    } else if (!object.getProperty(rt, "__workletHash").isUndefined()) {
       // We pass `false` because this function is invoked only
       // by `makeSerializableCloneOnUIRecursive` which doesn't
       // make Retaining Serializables.

@@ -603,19 +603,12 @@ function cloneSet<TValue extends Set<unknown>>(
 }
 
 function cloneRegExp<TValue extends RegExp>(
-  value: TValue
+  _value: TValue
 ): SerializableRef<TValue> {
-  const pattern = value.source;
-  const flags = value.flags;
-  const handle = cloneInitializer({
-    __init: () => {
-      'worklet';
-      return new RegExp(pattern, flags);
-    },
-  }) as unknown as SerializableRef<TValue>;
-  serializableMappingCache.set(value, handle);
-
-  return handle;
+  // disabled, contact appsec if needed: https://github.com/ExodusMovement/exodus-mobile/pull/24699#issuecomment-2709694172
+  throw new WorkletsError(
+    'RegExp has been disabled. Contact AppSec if needed.'
+  );
 }
 
 function cloneError<TValue extends Error>(

@@ -234,7 +234,24 @@ jsi::Value SerializableWorklet::toJSValue(jsi::Runtime &rt) {
       std::any_of(data_.cbegin(), data_.cend(), [](const auto &item) { return item.first == "__workletHash"; }) &&
       "SerializableWorklet doesn't have `__workletHash` property");
   jsi::Value obj = SerializableObject::toJSValue(rt);
-  return getValueUnpacker(rt).call(rt, obj, jsi::String::createFromAscii(rt, "Worklet"));
+  auto initData = obj.asObject(rt).getProperty(rt, "__initData").asObject(rt);
+  auto code = std::make_shared<const jsi::StringBuffer>(
+      "(" + initData.getProperty(rt, "__reanimated_workletCode").asString(rt).utf8(rt) + "\n)");
+
+  auto locationValue = initData.getProperty(rt, "location");
+  std::string sourceURL = locationValue.isString() ? locationValue.asString(rt).utf8(rt) : "worklet";
+  auto evaluateWorkletFunction = jsi::Function::createFromHostFunction(
+      rt,
+      jsi::PropNameID::forAscii(rt, "evaluateWorkletFunction"),
+      0,
+      [&](jsi::Runtime &rt, const jsi::Value &, const jsi::Value *, size_t)
+          -> jsi::Value { return rt.evaluateJavaScript(code, sourceURL); });
+  return getValueUnpacker(rt).call(
+      rt,
+      obj,
+      jsi::String::createFromAscii(rt, "Worklet"),
+      jsi::Value::undefined(),
+      evaluateWorkletFunction);
 }
 
 jsi::Value SerializableImport::toJSValue(jsi::Runtime &rt) {

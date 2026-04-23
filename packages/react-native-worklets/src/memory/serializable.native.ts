@@ -748,7 +748,15 @@ function inaccessibleObject<TValue extends object>(
 const WORKLET_CODE_THRESHOLD = 255;
 
 function getWorkletCode(value: WorkletFunction) {
-  const code = value?.__initData?.code;
+  const initData = value?.__initData;
+  if (!initData) {
+    return 'unknown';
+  }
+  // With Symbol-wrapped code, extract from __reanimated_workletCodeWrapper
+  const wrapper = initData.__reanimated_workletCodeWrapper;
+  const code = wrapper
+    ? wrapper[Symbol.for('__reanimated_workletCode')]
+    : initData.code;
   if (!code) {
     return 'unknown';
   }

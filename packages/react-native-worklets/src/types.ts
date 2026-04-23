@@ -51,7 +51,8 @@ export type WorkletStackDetails = [
 export type WorkletClosure = Record<string, unknown>;
 
 interface WorkletInitData {
-  code: string;
+  code?: string;
+  __reanimated_workletCodeWrapper?: Record<symbol, string>;
   /** Only in dev builds. */
   location?: string;
   /** Only in dev builds. */

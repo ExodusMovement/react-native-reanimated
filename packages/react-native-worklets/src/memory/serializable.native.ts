@@ -247,7 +247,7 @@ if (globalThis._WORKLETS_BUNDLE_MODE_ENABLED) {
   // TODO: Do it programmatically.
   createSerializable.__bundleData = {
     imported: 'createSerializable',
-    source: require.resolveWeak('react-native-worklets'),
+    source: require.resolveWeak('@exodus/react-native-worklets'),
   };
 }
 

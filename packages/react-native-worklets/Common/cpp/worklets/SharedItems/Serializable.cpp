@@ -10,6 +10,15 @@ using namespace facebook;
 
 namespace worklets {
 
+jsi::PropNameID workletCodePropName(jsi::Runtime &rt) {
+  jsi::Function symbolFor = rt.global()
+    .getPropertyAsObject(rt, "Symbol")
+    .getPropertyAsFunction(rt, "for");
+  jsi::Value val = symbolFor.call(rt, jsi::String::createFromAscii(rt, "__reanimated_workletCode"));
+  jsi::Symbol sym = val.asSymbol(rt);
+  return jsi::PropNameID::forSymbol(rt, sym);
+}
+
 jsi::Function getValueUnpacker(jsi::Runtime &rt) {
   auto valueUnpacker = rt.global().getProperty(rt, "__valueUnpacker");
   react_native_assert(valueUnpacker.isObject() && "valueUnpacker not found");
@@ -24,7 +33,11 @@ jsi::Value makeSerializableClone(
   std::shared_ptr<Serializable> serializable;
   if (value.isObject()) {
     auto object = value.asObject(rt);
-    if (!object.getProperty(rt, "__workletHash").isUndefined()) {
+    jsi::PropNameID prop = workletCodePropName(rt);
+    if (object.hasProperty(rt, prop)) {
+      jsi::Value code = object.getProperty(rt, prop);
+      serializable = std::make_shared<SerializableString>(code.asString(rt).utf8(rt));
+    } else if (!object.getProperty(rt, "__workletHash").isUndefined()) {
       // We pass `false` because this function is invoked only
       // by `makeSerializableCloneOnUIRecursive` which doesn't
       // make Retaining Serializables.
@@ -221,7 +234,24 @@ jsi::Value SerializableWorklet::toJSValue(jsi::Runtime &rt) {
       std::any_of(data_.cbegin(), data_.cend(), [](const auto &item) { return item.first == "__workletHash"; }) &&
       "SerializableWorklet doesn't have `__workletHash` property");
   jsi::Value obj = SerializableObject::toJSValue(rt);
-  return getValueUnpacker(rt).call(rt, obj, jsi::String::createFromAscii(rt, "Worklet"));
+  auto initData = obj.asObject(rt).getProperty(rt, "__initData").asObject(rt);
+  auto code = std::make_shared<const jsi::StringBuffer>(
+      "(" + initData.getProperty(rt, "__reanimated_workletCode").asString(rt).utf8(rt) + "\n)");
+
+  auto locationValue = initData.getProperty(rt, "location");
+  std::string sourceURL = locationValue.isString() ? locationValue.asString(rt).utf8(rt) : "worklet";
+  auto evaluateWorkletFunction = jsi::Function::createFromHostFunction(
+      rt,
+      jsi::PropNameID::forAscii(rt, "evaluateWorkletFunction"),
+      0,
+      [&](jsi::Runtime &rt, const jsi::Value &, const jsi::Value *, size_t)
+          -> jsi::Value { return rt.evaluateJavaScript(code, sourceURL); });
+  return getValueUnpacker(rt).call(
+      rt,
+      obj,
+      jsi::String::createFromAscii(rt, "Worklet"),
+      jsi::Value::undefined(),
+      evaluateWorkletFunction);
 }
 
 jsi::Value SerializableImport::toJSValue(jsi::Runtime &rt) {

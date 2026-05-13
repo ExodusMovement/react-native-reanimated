@@ -343,7 +343,12 @@ jsi::Value ReanimatedModuleProxy::getStaticFeatureFlag(jsi::Runtime &rt, const j
 
 jsi::Value
 ReanimatedModuleProxy::setDynamicFeatureFlag(jsi::Runtime &rt, const jsi::Value &name, const jsi::Value &value) {
-  reanimated::DynamicFeatureFlags::setFlag(name.asString(rt).utf8(rt), value.asBool());
+  const auto flagName = name.asString(rt).utf8(rt);
+  const auto flagValue = value.asBool();
+  if (flagName == "FORCE_REACT_RENDER_FOR_SETTLED_ANIMATIONS") {
+    reanimated::RuntimeFeatureFlags::setForceReactRenderForSettledAnimations(flagValue);
+  }
+  reanimated::DynamicFeatureFlags::setFlag(flagName, flagValue);
   return jsi::Value::undefined();
 }
 
@@ -528,9 +533,9 @@ void ReanimatedModuleProxy::unregisterCSSTransition(jsi::Runtime &rt, const jsi:
 }
 
 jsi::Value ReanimatedModuleProxy::getSettledUpdates(jsi::Runtime &rt) {
-  react_native_assert(
-      StaticFeatureFlags::getFlag("FORCE_REACT_RENDER_FOR_SETTLED_ANIMATIONS") &&
-      "getSettledUpdates requires FORCE_REACT_RENDER_FOR_SETTLED_ANIMATIONS static feature flag to be enabled");
+  if (!RuntimeFeatureFlags::forceReactRenderForSettledAnimations()) {
+    return jsi::Array(rt, 0);
+  }
 
   // TODO(future): use unified timestamp
   const auto currentTimestamp = getAnimationTimestamp_();

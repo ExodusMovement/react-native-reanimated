@@ -80,6 +80,7 @@
   },
   "homepage": "https://docs.swmansion.com/react-native-reanimated",
   "dependencies": {
+    "@babel/generator": "^7.20.0",
     "@babel/plugin-transform-arrow-functions": "^7.0.0-0",
     "@babel/plugin-transform-class-properties": "^7.0.0-0",
     "@babel/plugin-transform-classes": "^7.0.0-0",
@@ -89,6 +90,8 @@
     "@babel/plugin-transform-template-literals": "^7.0.0-0",
     "@babel/plugin-transform-unicode-regex": "^7.0.0-0",
     "@babel/preset-typescript": "^7.16.7",
+    "@babel/traverse": "^7.20.0",
+    "@babel/types": "^7.20.0",
     "convert-source-map": "^2.0.0",
     "invariant": "^2.2.4"
   },
@@ -101,7 +104,6 @@
     "@babel/cli": "^7.20.0",
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
-    "@babel/types": "^7.20.0",
     "@react-native/babel-preset": "0.76.0-rc.3",
     "@react-native/eslint-config": "0.76.0-rc.3",
     "@react-native/metro-config": "0.76.0-rc.3",

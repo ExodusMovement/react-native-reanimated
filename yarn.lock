@@ -2549,6 +2549,7 @@ __metadata:
   dependencies:
     "@babel/cli": "npm:^7.20.0"
     "@babel/core": "npm:^7.25.2"
+    "@babel/generator": "npm:^7.20.0"
     "@babel/plugin-transform-arrow-functions": "npm:^7.0.0-0"
     "@babel/plugin-transform-class-properties": "npm:^7.0.0-0"
     "@babel/plugin-transform-classes": "npm:^7.0.0-0"
@@ -2559,6 +2560,7 @@ __metadata:
     "@babel/plugin-transform-unicode-regex": "npm:^7.0.0-0"
     "@babel/preset-env": "npm:^7.25.3"
     "@babel/preset-typescript": "npm:^7.16.7"
+    "@babel/traverse": "npm:^7.20.0"
     "@babel/types": "npm:^7.20.0"
     "@react-native/babel-preset": "npm:0.76.0-rc.3"
     "@react-native/eslint-config": "npm:0.76.0-rc.3"
